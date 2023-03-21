@@ -5,6 +5,7 @@ const location = require("../util/location");
 const Place = require("../models/place");
 const mongodb = require("mongodb");
 const { mongoose } = require("mongoose");
+const fs = require("fs");
 const User = require("../models/user");
 
 let DUMMY_PLACES = [
@@ -61,8 +62,7 @@ const createPlace = async (req, res, next) => {
   const createdPlace = new Place({
     title,
     description,
-    image:
-      "https://images.unsplash.com/photo-1585506942812-e72b29cef752?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2828&q=80",
+    image: req.file.path,
     address,
     location: coordinates,
     creator,
@@ -157,6 +157,7 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError("error!!!!!bzzz", 404));
   }
 
+  const imagPath = toBeDeleted.image;
   try {
     const session = await Place.startSession();
     await session.startTransaction();
@@ -172,6 +173,9 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError("error!!fnfdfs", 404));
   }
 
+  fs.unlink(imagPath, (err) => {
+    console.log(err);
+  });
   res.status(200).json({ message: "deleted" });
 };
 
